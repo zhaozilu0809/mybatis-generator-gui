@@ -1,0 +1,65 @@
+Sub 批量填报一户一表统计表()
+    Dim sht_模板 As Worksheet, sht_数据源 As Worksheet, wkb_汇总 As Workbook, path_存储$
+    Dim i%, j%, arr_数据源, Name_户主$
+    
+    Application.ScreenUpdating = False
+    Set wkb_汇总 = ThisWorkbook
+    Set sht_模板 = wkb_汇总.Sheets("数据填报模板表")
+    Set sht_数据源 = wkb_汇总.Sheets("数据源")
+    
+    arr_数据源 = sht_数据源.UsedRange
+    
+    Call 获取文件夹路径(path_存储)
+    For i = 3 To UBound(arr_数据源) - 1
+        If arr_数据源(i, 14) = "户主" Then
+            Name_户号 = arr_数据源(i, 2)                '保存户号名称
+            Name_户主 = arr_数据源(i, 6)                '保存户主名称
+            sht_模板.Copy
+            With ActiveWorkbook
+                With .ActiveSheet
+                    .Range("D2") = arr_数据源(i, 2)     '居住地址
+                    .Range("B3") = arr_数据源(i, 6)     '户主
+                    .Range("D3") = arr_数据源(i, 7)     '性别
+                    .Range("F3") = arr_数据源(i, 9)     '身份证号码
+                    ' .Range("B4") = arr_数据源(i, 9)     '出生日期
+                    .Range("D4") = arr_数据源(i, 10)     '民族
+                    .Range("F4") = arr_数据源(i, 12)     '户籍地址
+                    .Range("B5") = arr_数据源(i, 16)     '文化程度
+                    .Range("D5") = arr_数据源(i, 13)     '政治面貌
+                    .Range("F5") = arr_数据源(i, 11)     '户籍类别
+                    .Range("B6") = arr_数据源(i, 15)     '婚姻状况
+                    .Range("D6") = arr_数据源(i, 18)     '工作单位
+                    .Range("F6") = arr_数据源(i, 17)     '联系方式
+                End With
+            End With
+        End If
+        With ActiveWorkbook
+            With .ActiveSheet
+                .Cells(8 + j, 2) = arr_数据源(i, 14)  '户主关系
+                .Cells(8 + j, 3) = arr_数据源(i, 6)   '姓名
+                .Cells(8 + j, 4) = arr_数据源(i, 9)   '身份证号码
+                .Cells(8 + j, 5) = arr_数据源(i, 18)   '工作单位
+                .Cells(8 + j, 7) = arr_数据源(i, 17)   '联系方式
+            End With
+            j = j + 1
+            If "户主" = arr_数据源(i + 1, 14) Then
+            .Close True, path_存储 & Name_户号 & "_" & Name_户主 & "_一户一表统计表.xls"
+            j = 0
+            End If
+        End With
+    Next
+    Application.ScreenUpdating = True
+    MsgBox "批量填报已完成！", vbInformation, "温馨提示"
+End Sub
+
+Private Sub 获取文件夹路径(PathStr As String)
+    With Application.FileDialog(msoFileDialogFolderPicker)
+        If .Show Then
+            PathStr = .SelectedItems(1)
+        Else
+            Exit Sub
+        End If
+    End With
+    PathStr = PathStr & IIf(Right(PathStr, 1) = "\", "", "\")
+End Sub
+
